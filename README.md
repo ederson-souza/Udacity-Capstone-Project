@@ -1,4 +1,4 @@
-# Udacity-Capstone-Project
+# Udacity-MLND-Capstone-Project
 
 This is my final project in Machine Learning Engineer Nanodegree.
 
