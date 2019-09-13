@@ -53,7 +53,9 @@ The solution is a classification model capable of predicting whether a customer 
 
 In this section, provide the details for a benchmark model or result that relates to the domain, problem statement, and intended solution. Ideally, the benchmark model or result contextualizes existing methods or known information in the domain and problem given, which could then be objectively compared to the solution. Describe how the benchmark model or result is measurable (can be measured by some metric and clearly observed) with thorough detail. -->
 
-Randomly predicting with 10% probability that whether or not a customer will make a transaction yields a AUC score of ~ 0.50 on the submission. This is equivalent to guess that all customers will not make the transaction.
+For the baseline benchmark, I have randomly predicted with 10% probability (the distribution of the training set) that a customer will make a transaction. This method yields an AUC score of ~ 0.50 on the submission to Kaggle. This is equivalent to guess that all customers will not make the transaction, which is very bad and naive.
+
+So, if the final model results in an AUC score better than the 0.50, we have succeeded.
 
 ### Evaluation Metrics
 <!-- _(approx. 1-2 paragraphs)_
