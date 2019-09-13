@@ -12,16 +12,12 @@ September 13, 2019
 
 <!-- In this section, provide brief details on the background information of the domain from which the project is proposed. Historical information relevant to the project should be included. It should be clear how or why a problem in the domain can or should be solved. Related academic research should be appropriately cited in this section, including why that research is relevant. Additionally, a discussion of your personal motivation for investigating a particular problem in the domain is encouraged but not required. -->
 
-Presently, fraud traffic is one of the most pressing matters coupled with the exponentially growing mobile phone prevalence. With the number of smart mobile devices approaching 2 billion worldwide, frauds in the mobile app ecosystem are more and more rampant.
+It is not unusual to hear a company's management speak about forecasts: "Our sales did not meet the forecasted numbers," or "we feel confident in the forecasted economic growth and expect to exceed our targets." You cannot predict the future of your business, but you can reduce risk by eliminating the guesswork. With accurate forecasting, you can make a systematic attempt to understand future performance. This will allow you to make better informed decisions and become more resistant to unforeseen financial requirements.
+Without correctly estimating financial requirements and understanding changing markets, your business decisions will be guess work which can result in insufferable damage.
 
-<div style="align: center; text-align: center;">
-![fraud rate 2017](assets/fraud_rate_graph.png)
-<p>
-_Source: [DataVisor](https://www.datavisor.com/)_
-</p>
-</div>
+So, with that in mind, without doubt, it is very important to help business forecasting future products and services demands.
 
-It is shown that fraudulent apps led to at least 15% of the total amount of apps downloaded and installed on smartphones in 2017. In 2016, $5.7 billion dollars were spent on mobile advertising in the US alone; these numbers tell us that fraudsters are making away with hundreds of millions from developers and businesses each year. Clearly, mobile frauds are a severe financial burden and a serious threat to the mobile industry.  
+And because of that, I chose the Santander Customer Transaction Prediction dataset to try building a model that can consistently handle this task.
 
 ### Problem Statement
 <!-- _(approx. 1 paragraph)_
