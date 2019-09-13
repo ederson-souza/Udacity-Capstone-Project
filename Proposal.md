@@ -24,7 +24,7 @@ And because of that, I chose the Santander Customer Transaction Prediction datas
 
 In this section, clearly describe the problem that is to be solved. The problem described should be well defined and should have at least one relevant potential solution. Additionally, describe the problem thoroughly such that it is clear that the problem is quantifiable (the problem can be expressed in mathematical or logical terms) , measurable (the problem can be measured by some metric and clearly observed), and replicable (the problem can be reproduced and occurs more than once). -->
 
-Banco Santander, S.A., doing business as Santander Group, is a Spanish multinational commercial bank and financial services company based in Madrid and Santander in Spain. Additionally, Santander maintains a presence in all global financial centres as the 16th-largest banking institution in the world. Although known for its European banking operations, it has extended operations across North and South America, and more recently in continental Asia.[Wikipedia](https://en.wikipedia.org/wiki/Banco_Santander)
+Banco Santander, S.A., doing business as Santander Group, is a Spanish multinational commercial bank and financial services company based in Madrid and Santander in Spain. Additionally, Santander maintains a presence in all global financial centres as the 16th-largest banking institution in the world. Although known for its European banking operations, it has extended operations across North and South America, and more recently in continental Asia. [Wikipedia](https://en.wikipedia.org/wiki/Banco_Santander)
 
 In their [Kaggle competition](https://www.kaggle.com/c/santander-customer-transaction-prediction), Santander provided an anonymized dataset containing numeric feature variables, the binary target column, and a string ID_code column; the goal is to build a model that predicts the probability of a customer make a specific transaction in the future.
 
@@ -33,14 +33,16 @@ In their [Kaggle competition](https://www.kaggle.com/c/santander-customer-transa
 
 In this section, the dataset(s) and/or input(s) being considered for the project should be thoroughly described, such as how they relate to the problem and why they should be used. Information such as how the dataset or input is (was) obtained, and the characteristics of the dataset or input, should be included with relevant references and citations as necessary It should be clear how the dataset(s) or input(s) will be used in the project and whether their use is appropriate given the context of the problem. -->
 
-The dataset provided by Talking Data on [Kaggle competition homepage](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection) includes approximately 200 million registered clicks over 4 days, split into training and testing sets. The training set contains more than 180 million rows of data, each has the timestamp of the click, number-encoded IP addresses, device numbered label code, device's operating system code, app code, channel code, whether the click resulted in a download or not, and time of download if applicable. The testing set contains about 18 million clicks with each click associated with an ID and other information excluding the download or not label and download time.
+The dataset provided by Santander on [Kaggle competition](https://www.kaggle.com/c/santander-customer-transaction-prediction/data) includes approximately 400k costumers, split into training and testing sets. The training set contains more than 200k rows of data and 200 features, the binary target column, and a string ID_code column. The testing set contains about same 200k costumers, 200 features and the string ID_code column.
+
+There is no description of the features. They are just numeric and contains both positive and negative values. 
 
 ### Solution Statement
 <!-- _(approx. 1 paragraph)_
 
 In this section, clearly describe a solution to the problem. The solution should be applicable to the project domain and appropriate for the dataset(s) or input(s) given. Additionally, describe the solution thoroughly such that it is clear that the solution is quantifiable (the solution can be expressed in mathematical or logical terms) , measurable (the solution can be measured by some metric and clearly observed), and replicable (the solution can be reproduced and occurs more than once). -->
 
-The solution is a classification model capable of predicting whether a click with known attributes would result in the respective app being downloaded to the device or not. First, I will use Pandas and Numpy to gain some understanding of the data, then try to devise some new features based on the given features to train on. As for model, I am inclined towards XGBoost, a powerful Gradient Boosting framework that has proven itself in many past Kaggle competitions while being versatile and work with other frameworks such as scikit-learn.
+The solution is a classification model capable of predicting whether a customer will make a transaction or not in the future. First, I will use Pandas and Numpy to gain some understanding of the data and cleaning it, if necessary. For the model, I am inclined towards XGBoost, a powerful Gradient Boosting framework that has proven itself in many past Kaggle competitions while being versatile and work with other frameworks such as scikit-learn.
 
 ### Benchmark Model
 <!-- _(approximately 1-2 paragraphs)_
