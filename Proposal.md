@@ -1,8 +1,8 @@
 # Machine Learning Engineer Nanodegree
 ## Capstone Proposal
-## TalkingData AdTracking Fraud Detection Challenge
-Nguyen Quoc Bao  
-June 17, 2018
+## Santander Customer Transaction Prediction
+Éderson André de Souza  
+September 13, 2019
 
 ## Proposal
 <!-- _(approx. 2-3 pages)_ -->
