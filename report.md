@@ -1,13 +1,13 @@
-# Machine Learning Engineer Nanodegree
-## Capstone Project
+# **Machine Learning Engineer Nanodegree**
+## **Capstone Project**
 Éderson André de Souza
 
 October 12, 2019
 
-## I. Definition
+## **I. Definition**
 <!-- _(approx. 1-2 pages)_ -->
 
-### Project Overview
+### **Project Overview**
 <!-- In this section, look to provide a high-level overview of the project in layman’s terms. Questions to ask yourself when writing this section:
 - _Has an overview of the project been provided, such as the problem domain, project origin, and related datasets or input data?_
 - _Has enough background information been given so that an uninformed reader would understand the problem domain and following problem statement?_ -->
@@ -21,7 +21,7 @@ And because of that, I chose the Santander Customer Transaction Prediction datas
 
 In this project, I trained and tested a binary classifier capable of predicting the probability of a customer make a specific transaction in the future. The model used the gradient boosting algorithm, and was trained on the data provided for [their Kaggle competition](https://www.kaggle.com/c/santander-customer-transaction-prediction/data).
 
-### Problem Statement
+### **Problem Statement**
 <!-- In this section, you will want to clearly define the problem that you are trying to solve, including the strategy (outline of tasks) you will use to achieve the desired solution. You should also thoroughly discuss what the intended solution will be for this problem. Questions to ask yourself when writing this section:
 - _Is the problem statement clearly defined? Will the reader understand what you are expecting to solve?_
 - _Have you thoroughly discussed how you will attempt to solve the problem?_
@@ -33,7 +33,7 @@ In their [Kaggle competition](https://www.kaggle.com/c/santander-customer-transa
 
 To solve this problem, firstly I attained some basic understanding of the training data that was provided to check for characteristics such as target concept balance and distribution of features; Then, I used a classification model based on the well known Logistic Regression as my baseline model for comparison. The final model is build on a gradient boosting framework, The XGBoost. I also have decided to evaluate the amount of data used, and performed parameter tuning for the GB model. Lastly, I tested the final model design using its performance on the given testing data.
 
-### Metrics
+### **Metrics**
 <!-- In this section, you will need to clearly define the metrics or calculations you will use to measure performance of a model or result in your project. These calculations and metrics should be justified based on the characteristics of the problem and problem domain. Questions to ask yourself when writing this section:
 - _Are the metrics you’ve chosen to measure the performance of your models clearly discussed and defined?_
 - _Have you provided reasonable justification for the metrics chosen based on the problem and solution?_ -->
@@ -52,10 +52,10 @@ Using the ROC-AUC metric, we can see the closeness between the model's predictio
 
 In my opinion, another reason why ROC-AUC was chosen to measure classifier performance in this competition instead of for example simple accuracy metric, is because of its sensitivity towards True Positive and False Positive. As you may notice, accuracy don't work well for imbalanced datasets.
 
-## II. Analysis
+## **II. Analysis**
 <!-- _(approx. 2-4 pages)_ -->
 
-### Data Exploration
+### **Data Exploration**
 <!-- In this section, you will be expected to analyze the data you are using for the problem. This data can either be in the form of a dataset (or datasets), input data (or input files), or even an environment. The type of data should be thoroughly described and, if possible, have basic statistics and information presented (such as discussion of input features or defining characteristics about the input or environment). Any abnormalities or interesting qualities about the data that may need to be addressed have been identified (such as features that need to be transformed or the possibility of outliers). Questions to ask yourself when writing this section:
 - _If a dataset is present for this problem, have you thoroughly discussed certain features about the dataset? Has a data sample been provided to the reader?_
 - _If a dataset is present for this problem, are statistics about the dataset calculated and reported? Have any relevant results from this calculation been discussed?_
@@ -91,34 +91,34 @@ The dataset provided by Santander on [Kaggle competition](https://www.kaggle.com
     * *Standard Deviation*: 0.01 -> 21.40.
     * *Min*: Range -90.25 -> 13.73
     * *Max*: Range 1.00 -> 74.03  
+* There is no strong correlation between features.
+    * Strongest Positive Correlation: 0.0097
+    * Strongest Negative Correlation: -0.0098
 
-### Exploratory Visualization
+
+### **Exploratory Visualization**
 <!-- In this section, you will need to provide some form of visualization that summarizes or extracts a relevant characteristic or feature about the data. The visualization should adequately support the data being used. Discuss why this visualization was chosen and how it is relevant. Questions to ask yourself when writing this section:
 - _Have you visualized a relevant characteristic or feature about the dataset or input data?_
 - _Is the visualization thoroughly analyzed and discussed?_
 - _If a plot is provided, are the axes, title, and datum clearly defined?_ -->
 
-The plot below shows how skewed the target concept is in the first 10 million rows of the training set:
+The plot below shows the distribution of the target in the training set:
+
 
 <center>
-![eda target distribution](assets/eda_target.png)
+<img src="assets/target.png">
 </center>
 
-Clearly, this needs to be taken into consideration later when the classification model is chosen.
+This may need to be taken into consideration later when the classification model is chosen.
 
-For each given feature, how many unique values does it have?
+Let's visualize the feature distributions:
 
 <center>
-![eda unique values](assets/eda_uniques_per_feature.png)
+<img src="assets/features_final.png">
 </center>
 
-While it makes sense for the number of unique devices and oses to be so low as there are only so many phone models and OSes, and same goes for app and channel, it is quite interesting to see only about 40,000 IP addresses are responsible for 10,000,000 ad clicks in less than a day! That means on average an IP address has about 250 ad clicks in a few hours! Clearly some IP have abnormally too many clicks, possibly click factories fraudsters.
+As mentioned above, all features show distributions like Normal.
 
-This graph shows some IPs with the most number of empty clicks (positive):
-
-<center>
-![eda ip fraud clicks](assets/eda_ip_fraud_clicks.png)
-</center>
 
 ### Algorithms and Techniques
 <!-- In this section, you will need to discuss the algorithms and techniques you intend to use for solving the problem. You should justify the use of each one based on the characteristics of the problem and the problem domain. Questions to ask yourself when writing this section:
@@ -137,47 +137,50 @@ XGBoost is an example of gradient boosting model, which is built in stages just 
 [source: T. Chen, C. Guestrin](http://dmlc.cs.washington.edu/data/pdf/XGBoostArxiv.pdf)
 
 There is a number of advantages in using XGBoost over other classification methods:
-* **Work with large data:** XGBoost packs many advantageous features to facilitate working with data of enormous size that typically can't fit into the system's memory such as distributed or cloud computing. It is also implemented with automatic handling of missing data (sparse) and allows continuation of training, or batch training which was a tremendous help for me in this project.
+* **Work with large data:** XGBoost packs many advantageous features to facilitate working with data of enormous size that typically can't fit into the system's memory such as distributed or cloud computing. It is also implemented with automatic handling of missing data (sparse) and allows continuation of training, or batch training.
 * **Built-in regularization:** XGBoost supports several options when it comes to controlling regularization and keeping the model from overfitting, including gamma (minimum loss reduction to split a node further), L1 and L2 regularizations, maximum tree depth, minimum sum of weights of all observations required in a child, etc.
 * **Optimization for both speed and performance:** XGBoost provides options to reduce computation time while keeping model accuracy using parallelization with multi-core CPU, cache optimization, and GPU mode that makes use of the graphics unit for tree training.
 
-### Benchmark
+### **Benchmark**
 <!-- In this section, you will need to provide a clearly defined benchmark result or threshold for comparing across performances obtained by your solution. The reasoning behind the benchmark (in the case where it is not an established result) should be discussed. Questions to ask yourself when writing this section:
 - _Has some result or value been provided that acts as a benchmark for measuring performance?_
 - _Is it clear how this result or value was obtained (whether by data or by hypothesis)?_ -->
 
-A benchmark for this problem is a classifying model that randomly guess whether or not a registered click on an advertisement would result in a download of the advertised app. The guessed probability is either 0 or 1. On the testing dataset, the model scored 0.3893 of the ROC-AUC metrics measuring the closeness of the resulted probability graph versus that of the solution.
+For the baseline benchmark, I have randomly predicted with 10% probability (the distribution of the training set) that a customer will make a transaction. This method yields an AUC score of ~ 0.50 on the submission to Kaggle. This is equivalent to guess that all customers will not make the transaction, which is very bad and naive.
 
-## III. Methodology
+So, if the final model results in an AUC score better than the 0.50, we have succeeded.
+
+Because of this naive approach, I have decided to bring a Baseline Model for benchmark too. It is Logistic Regression,  one of the simplest classification models in the toolbox of any Data Scientist. This problem has a binary target, so Logistic Regression can be applied. LR is easy to implement, tune, update and interpret.
+    
+<a href='https://elitedatascience.com/machine-learning-algorithms'>Reference 01</a>
+<a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 02</a>    <a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 03</a>    <a href='https://www.dataschool.io/comparing-supervised-learning-algorithms/'>Reference 04</a>
+
+So, in the end, our main goal is to beat the Logistic Regression Model AUC.
+
+## **III. Methodology**
 <!-- _(approx. 3-5 pages)_ -->
 
-### Data Preprocessing
+### **Data Preprocessing**
 <!-- In this section, all of your preprocessing steps will need to be clearly documented, if any were necessary. From the previous section, any of the abnormalities or characteristics that you identified about the dataset will be addressed and corrected here. Questions to ask yourself when writing this section:
 - _If the algorithms chosen require preprocessing steps like feature selection or feature transformations, have they been properly documented?_
 - _Based on the **Data Exploration** section, if there were abnormalities or characteristics that needed to be addressed, have they been properly corrected?_
 - _If no preprocessing is needed, has it been made clear why?_ -->
 
-As previously mentioned, the given dataset had already been well-prepared and processed, all categorical features had been labelled and set to numbers, sensitive data encoded, and potentially missing data had been either filled or discarded.
-
-#### Data conversion
-
-Before being feed to the model, the time attributes need to be converted to a format that XGBoost can understand. In its raw form, the attribute `click_time` was given in the format of `yyyy-mm-dd hh-mm-ss`; I have chosen to extract this into 3 new features: `click_day`, `click_hour`, `click_minute`, corresponding to the day, hour, and minute the click was registered, and in integer format. For `click_time`, the year and month information was disregarded simply because the data was recorded in the same month, so these values should be the same for all data points. On the other hand, I did not extract the second out of `click_time` because this value by itself does not how much meaning; in my opinion, humans are precise creatures but not down to the seconds in most cases. Moreover, I later made use of the click second in an engineered feature.
+As partially mentioned, the given dataset had already been well-prepared and processed, all categorical features had been labelled and set to binary numbers, features normalized, and potentially missing data had been either filled or discarded.
 
 #### Feature engineering
 
-##### How many clicks does an user make to a certain app?
+In my opinion, the hardest task in this project was feature engineering.  
+The main reason is that there is no explanation about the features. All of them are meaningless numbers and without correlation. And for leaving this task even harder, there are 200 features, which demand a lot of computational power to work with.
+So, I didn't make any feature engineering in this project.
 
-Between a normal mobile user who clicks on an advertisement out of personal interest and a fraudster whose aim is to make as many empty clicks as possible, the fraudster would make many more clicks on the same advertisement than the normal user. This is because in a typical case once the user have visited the ad, he/she would be able to make the decision immediately or after just a few more clicks unless he/she is very indecisive! Therefore, a fraudster would make hundreds or even thousands of clicks on the same ad compared to a handful by an user, and this could be a clear distinction for the tree classifiers to pick up.
 
-In order to create this new feature, `avg_app_click_by_ip`, I grouped the data based on the app, and divided the number of clicks by the number of unique IP addresses. Why did I only consider IP addresses and not device, OS, and channel? This is because a common "click farm" where fraudsters mass produce clicks can be set up with various devices and operating system, as can be seen [here](https://www.channelnewsasia.com/news/asia/thai-police-bust-chinese-click-farm-seize-400-000-sim-cards-8942736). In recent years, mobile frauds seem to have evolved to be more sophisticated in order to avoid the countermeasures put up by authorities. They equip themselves with varying phones and tablets models in order to mislead advertisers into thinking that several users are interacting with their advertisements. However, it is not easy for fraudsters to hide or relay their IP addresses because in countries such as China where mobile frauds are prevalent, it is not easy to access services such as VPN or relay servers.
+#### Handling Imbalanced Dataset
 
-##### Is a given click a one-off event or the user actually is on a click-spree?
 
-As the goal is to tell clicks by genuine users from those by fraudsters who typically make a lot of clicks but never actually download apps, I think it is important to know how long does it take for the same user to make another ad click. The intuition is that a genuine user generally takes longer before making another click, since he/she would need time to decide whether to download the app or not, while a fraudster who never intends to download the app in the first place would not need to do so and hence takes less time before clicking another ad.
+#### Feature Scaling and Data Sampling
 
-This new feature, `time_to_next_click`, is the amount of time measured in seconds in between clicks made by devices of the same IP address, model, OS, and from the same channel. While this can be a decisive feature differentiating a fraudster and an ordinary user, it is clear that it is not perfectly accurate due to the previously mentioned fact that the given data cannot exactly pinpoint individual users; it is not uncommon to have users with the same device and OS on the same network in school, cafe, or building, and these people may be wrongly taken as the one user.
-
-In the end however, due to the sheer size of the data being too large, Pandas was unable to fully construct this feature on the whole training dataset of nearly 180,000,000 lines, so I decided to construct it on a portion of the data only.
+As 
 
 ### Implementation
 <!-- In this section, the process for which metrics, algorithms, and techniques that you implemented for the given data will need to be clearly documented. It should be abundantly clear how the implementation was carried out, and discussion should be made regarding any complications that occurred during this process. Questions to ask yourself when writing this section:
