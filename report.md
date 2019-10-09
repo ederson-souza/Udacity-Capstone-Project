@@ -128,13 +128,14 @@ As mentioned above, all features show distributions like Normal.
 
 **Extreme Gradient Boosting (XGBoost)** is an implementation of the gradient boosting machines that is highly flexible and versatile while being scalable and fast. XGBoost works with most regression, classification, and ranking problems as well as other objective functions; the framework also gained its popularity in recent years because of its compatibility with most platforms and distributed solutions like Amazon AWS, Apache Hadoop, Spark among others.
 
-In short, XGBoost is a variation of boosting - an ensemble method algorithm that tries to fit the data by using a number of "weak" models, typically decision trees. The idea is that a "weak" classifier which only performs slightly better than random guessing can be improved ("boosted") into a "stronger" one that is arbitrarily more accurate ([source: Y. Freund, R. E. Schapire](https://cseweb.ucsd.edu/~yfreund/papers/IntroToBoosting.pdf))([source: R. E. Schapire](http://www.cs.princeton.edu/~schapire/papers/strengthofweak.pdf)). Building on the weak learners sequentially, at every round each learner aims to reduce the bias of the whole ensemble of learners, thus the weaker learners eventually combined into a powerful model. This idea gave birth to various boosting algorithms such as AdaBoost, Gradient Tree Boosting, etc.
+In short, XGBoost is a variation of boosting - an ensemble method algorithm that tries to fit the data by using a number of "weak" models, typically decision trees. The idea is that a "weak" classifier which only performs slightly better than random guessing can be improved ("boosted") into a "stronger" one that is arbitrarily more accurate. Building on the weak learners sequentially, at every round each learner aims to reduce the bias of the whole ensemble of learners, thus the weaker learners eventually combined into a powerful model. This idea gave birth to various boosting algorithms such as AdaBoost, Gradient Tree Boosting, etc.
 
 XGBoost is an example of gradient boosting model, which is built in stages just like any other boosting method. In gradient boosting, weak learners are generalized by optimizing an arbitrary loss function using its gradient.
 
 > XGBoost, as a variation of boosting, features a novel tree learning algorithm for handling sparse data; a theoretically justified weighted quantile sketch procedure enables handling instance weights in approximate tree learning.
-
-[source: T. Chen, C. Guestrin](http://dmlc.cs.washington.edu/data/pdf/XGBoostArxiv.pdf)
+<a href= 'https://cseweb.ucsd.edu/~yfreund/papers/IntroToBoosting.pdf'>Reference 01 </a>
+<a href= 'http://www.cs.princeton.edu/~schapire/papers/strengthofweak.pdf'>Reference 02 </a>
+<a href= 'http://dmlc.cs.washington.edu/data/pdf/XGBoostArxiv.pdf'>Reference 03 </a>
 
 There is a number of advantages in using XGBoost over other classification methods:
 * **Work with large data:** XGBoost packs many advantageous features to facilitate working with data of enormous size that typically can't fit into the system's memory such as distributed or cloud computing. It is also implemented with automatic handling of missing data (sparse) and allows continuation of training, or batch training.
@@ -152,8 +153,8 @@ So, if the final model results in an AUC score better than the 0.50, we have suc
 
 Because of this naive approach, I have decided to bring a Baseline Model for benchmark too. It is Logistic Regression,  one of the simplest classification models in the toolbox of any Data Scientist. This problem has a binary target, so Logistic Regression can be applied. LR is easy to implement, tune, update and interpret.
     
-<a href='https://elitedatascience.com/machine-learning-algorithms'>Reference 01</a>
-<a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 02</a>    <a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 03</a>    <a href='https://www.dataschool.io/comparing-supervised-learning-algorithms/'>Reference 04</a>
+<a href='https://elitedatascience.com/machine-learning-algorithms'>Reference 01 </a>
+<a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 02 </a>    <a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 03 </a>    <a href='https://www.dataschool.io/comparing-supervised-learning-algorithms/'>Reference 04 </a>
 
 So, in the end, our main goal is to beat the Logistic Regression Model AUC.
 
@@ -168,21 +169,42 @@ So, in the end, our main goal is to beat the Logistic Regression Model AUC.
 
 As partially mentioned, the given dataset had already been well-prepared and processed, all categorical features had been labelled and set to binary numbers, features normalized, and potentially missing data had been either filled or discarded.
 
-#### Feature engineering
+#### **Feature engineering**
 
 In my opinion, the hardest task in this project was feature engineering.  
 The main reason is that there is no explanation about the features. All of them are meaningless numbers and without correlation. And for leaving this task even harder, there are 200 features, which demand a lot of computational power to work with.
 So, I didn't make any feature engineering in this project.
 
 
-#### Handling Imbalanced Dataset
+#### **Handling Imbalanced Dataset**
+
+As we saw earlier, the training data set is very imbalanced. Only 10.049% of the target is positive.     
+An approach to this problem is oversampling.
+Oversampling can be defined as adding more copies of the minory class based upon the existing observations. <a href='https://en.wikipedia.org/wiki/Oversampling_and_undersampling_in_data_analysis'>Reference</a>
+
+In this case, I have applied a technique called SMOTE. What it does is: *"First it finds the n-nearest neighbors in the minority class for each of the samples in the class . Then it draws a line between the the neighbors an generates random points on the lines"*. <a href='https://medium.com/coinmonks/smote-and-adasyn-handling-imbalanced-data-set-34f5223e167'>Reference</a>
+
+First, applying SMOTE on the Baseline Model, I didn't observe any major improvement on AUC Score, but the big impact was on Recall Score. It jumped from an average of 0.2503 to 0.7526, which means that 75.26% of the positive targets were correctly classified. Therefore, in case Santander needs to predict all transactions as possible, the higher the Recall Score is, the better.    
+
+#### **Feature Scaling and Data Sampling**
+
+Lastly in the Preprocessing section, I have implemented Feature Scaling and Data Sampling.
+
+As you may notice at Data Exploration, each feature has its own range of values, and good practice is to bring all features to the same level of magnitudes with Feature Scaling.
+
+There are many techniques to handle this job like Rescaling (min-max normalization), Mean normalization, Standardization, Scaling to unit length and others.
+
+However, I have chosen Standardization, which makes the values of each feature in the data have zero-mean and unit-variance. The main reason for choosing Standardization is because this method is widely used in many machine learning algorithms and it is very effective for Logistic Regression.
+
+For Tree-based models like XGBoost, Feature Scaling is not required, but I have used to speed up the calculations.
+
+<a href= 'https://medium.com/greyatom/why-how-and-when-to-scale-your-features-4b30ab09db5e'>Reference 01</a>
+<a href= 'https://en.wikipedia.org/wiki/Feature_scaling'>Reference 02</a>
+
+Data Sampling 
 
 
-#### Feature Scaling and Data Sampling
-
-As 
-
-### Implementation
+### **Implementation**
 <!-- In this section, the process for which metrics, algorithms, and techniques that you implemented for the given data will need to be clearly documented. It should be abundantly clear how the implementation was carried out, and discussion should be made regarding any complications that occurred during this process. Questions to ask yourself when writing this section:
 - _Is it made clear how the algorithms and techniques were implemented with the given datasets or input data?_
 - _Were there any complications with the original metrics or techniques that required changing prior to acquiring a solution?_
