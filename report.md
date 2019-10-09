@@ -156,7 +156,7 @@ Because of this naive approach, I have decided to bring a Baseline Model for ben
 <a href='https://elitedatascience.com/machine-learning-algorithms'>Reference 01 </a>
 <a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 02 </a>    <a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 03 </a>    <a href='https://www.dataschool.io/comparing-supervised-learning-algorithms/'>Reference 04 </a>
 
-So, in the end, our main goal is to beat the Logistic Regression Model AUC.
+So, in the end, our main goal is to beat the Logistic Regression Model AUC, which is 0.8596 with 50% of the dataset (we will discuss sample size in the next section).
 
 ## **III. Methodology**
 <!-- _(approx. 3-5 pages)_ -->
@@ -175,6 +175,30 @@ In my opinion, the hardest task in this project was feature engineering.
 The main reason is that there is no explanation about the features. All of them are meaningless numbers and without correlation. And for leaving this task even harder, there are 200 features, which demand a lot of computational power to work with.
 So, I didn't make any feature engineering in this project.
 
+#### **Feature Scaling and Data Sampling**
+
+As you may notice at Data Exploration, each feature has its own range of values, and good practice is to bring all features to the same level of magnitudes with Feature Scaling.
+
+There are many techniques to handle this job like Rescaling (min-max normalization), Mean normalization, Standardization, Scaling to unit length and others.
+
+However, I have chosen Standardization, which makes the values of each feature in the data have zero-mean and unit-variance. The main reason for choosing Standardization is because this method is widely used in many machine learning algorithms and it is very effective for Logistic Regression.
+
+For Tree-based models like XGBoost, Feature Scaling is not required, but I have used to try speed up the calculations.
+
+<a href= 'https://medium.com/greyatom/why-how-and-when-to-scale-your-features-4b30ab09db5e'>Reference 01</a>
+<a href= 'https://en.wikipedia.org/wiki/Feature_scaling'>Reference 02</a>
+
+In order to save computational power and time, I have tested the baseline model with Stratified Samples of the training set. The sample size started at 10% and was incremented by 10% every test until 100%, meaning the entire dataset.
+
+Plotting results obtained, we can see that the best result (AUC = 0.8622) came from 70% of the dataset size and using only 50% of it also shown a very good result (AUC = 0.8596).
+
+<center>
+<img src="assets/AUC Score by Size.png">
+</center>
+
+Another big advantage of using a stratified sample of the data was time-saving. Training with 70% of the dataset saved about 35% of the time, and 50% of the dataset saved about 55% of the time to train the model.
+
+Given that, the final model will be trained using only 50% of the dataset.
 
 #### **Handling Imbalanced Dataset**
 
@@ -184,24 +208,9 @@ Oversampling can be defined as adding more copies of the minory class based upon
 
 In this case, I have applied a technique called SMOTE. What it does is: *"First it finds the n-nearest neighbors in the minority class for each of the samples in the class . Then it draws a line between the the neighbors an generates random points on the lines"*. <a href='https://medium.com/coinmonks/smote-and-adasyn-handling-imbalanced-data-set-34f5223e167'>Reference</a>
 
-First, applying SMOTE on the Baseline Model, I didn't observe any major improvement on AUC Score, but the big impact was on Recall Score. It jumped from an average of 0.2503 to 0.7526, which means that 75.26% of the positive targets were correctly classified. Therefore, in case Santander needs to predict all transactions as possible, the higher the Recall Score is, the better.    
+Applying SMOTE on the Baseline Model, it was not observed any improvement on AUC Score, but the big impact was on Recall Score. It jumped from 0.246854 to 0.766215, which means that 76.62% of the positive targets were correctly classified. Therefore, in case Santander needs to predict all transactions as possible, the higher the Recall Score is, the better.
 
-#### **Feature Scaling and Data Sampling**
-
-Lastly in the Preprocessing section, I have implemented Feature Scaling and Data Sampling.
-
-As you may notice at Data Exploration, each feature has its own range of values, and good practice is to bring all features to the same level of magnitudes with Feature Scaling.
-
-There are many techniques to handle this job like Rescaling (min-max normalization), Mean normalization, Standardization, Scaling to unit length and others.
-
-However, I have chosen Standardization, which makes the values of each feature in the data have zero-mean and unit-variance. The main reason for choosing Standardization is because this method is widely used in many machine learning algorithms and it is very effective for Logistic Regression.
-
-For Tree-based models like XGBoost, Feature Scaling is not required, but I have used to speed up the calculations.
-
-<a href= 'https://medium.com/greyatom/why-how-and-when-to-scale-your-features-4b30ab09db5e'>Reference 01</a>
-<a href= 'https://en.wikipedia.org/wiki/Feature_scaling'>Reference 02</a>
-
-Data Sampling 
+At the XGBoost final model, the oversampling technique is already inside the hyperparameters (scale_pos_weight). Therefore, SMOTE package won't be used.
 
 
 ### **Implementation**
@@ -211,11 +220,12 @@ Data Sampling
 - _Was there any part of the coding process (e.g., writing complicated functions) that should be documented?_ -->
 
 The software requirement for the implementation is as followed:
-* Python >= 3.6
-* numpy >= 1.14.3
-* pandas >= 0.23.0
-* scikit-learn >= 0.19.1
-* xgboost == 0.72
+* Python >= 3.7
+* numpy >= 1.16.5
+* pandas >= 0.25.1
+* scikit-learn >= 0.21.3
+* xgboost >= 0.90
+* hyperopt >= 0.2 
 
 I first attempted to train an XGBoost model without the engineered features, then planned to compare the performance to the same model trained with data with added features. The model's performance is evaluated by its ROC-AUC score on the testing data. The model's parameters were as followed:
 * Objective function: logistic binary
