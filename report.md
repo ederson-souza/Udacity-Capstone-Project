@@ -156,7 +156,9 @@ Because of this naive approach, I have decided to bring a Baseline Model for ben
 <a href='https://elitedatascience.com/machine-learning-algorithms'>Reference 01 </a>
 <a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 02 </a>    <a href='https://towardsdatascience.com/real-world-implementation-of-logistic-regression-5136cefb8125'>Reference 03 </a>    <a href='https://www.dataschool.io/comparing-supervised-learning-algorithms/'>Reference 04 </a>
 
-So, in the end, our main goal is to beat the Logistic Regression Model AUC, which is 0.8596 with 50% of the dataset (we will discuss sample size in the next section).
+So, in the end, our main goal is to beat the Logistic Regression Model AUC, which is 0.8603 on the validation subset, using about 50% of the dataset (we will discuss sample size in the next section).
+
+Just for clarification, the train dataset was split into train and validation subsets. The train subset got 80% of the data and validation got the 20% left. 
 
 ## **III. Methodology**
 <!-- _(approx. 3-5 pages)_ -->
@@ -208,7 +210,7 @@ Oversampling can be defined as adding more copies of the minory class based upon
 
 In this case, I have applied a technique called SMOTE. What it does is: *"First it finds the n-nearest neighbors in the minority class for each of the samples in the class . Then it draws a line between the the neighbors an generates random points on the lines"*. <a href='https://medium.com/coinmonks/smote-and-adasyn-handling-imbalanced-data-set-34f5223e167'>Reference</a>
 
-Applying SMOTE on the Baseline Model, it was not observed any improvement on AUC Score, but the big impact was on Recall Score. It jumped from 0.246854 to 0.766215, which means that 76.62% of the positive targets were correctly classified. Therefore, in case Santander needs to predict all transactions as possible, the higher the Recall Score is, the better.
+Applying SMOTE on the Baseline Model, it was not observed any improvement on AUC Score, but the big impact was on Recall Score. It jumped from 0.246854 to 0.769603, which means that 76.62% of the positive targets were detected. Therefore, in case Santander needs to predict all transactions as possible, the higher the Recall Score is, the better.
 
 At the XGBoost final model, the oversampling technique is already inside the hyperparameters (scale_pos_weight). Therefore, SMOTE package won't be used.
 
@@ -227,7 +229,7 @@ The software requirement for the implementation is as followed:
 * xgboost >= 0.90
 * hyperopt >= 0.2 
 
-I first attempted to train an XGBoost model without the engineered features, then planned to compare the performance to the same model trained with data with added features. The model's performance is evaluated by its ROC-AUC score on the testing data. The model's parameters were as followed:
+I first attempted to train an XGBoost model right of the box, without tuning. Then I planned to compare the performance to the same model trained with hyperparameter tuning. The model's performance is evaluated by its ROC-AUC score on the testing data. The only model's parameters were as followed:
 * Objective function: logistic binary
 * Scale positive weight: 99 (scale up the weight of the positive data points `is_attributed==0` to counter the imbalance of the data)
 * Parallel jobs: 3 (to make use of CPU cores)
