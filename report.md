@@ -120,7 +120,7 @@ Let's visualize the feature distributions:
 As mentioned above, all features show distributions like Normal.
 
 
-### Algorithms and Techniques
+### **Algorithms and Techniques**
 <!-- In this section, you will need to discuss the algorithms and techniques you intend to use for solving the problem. You should justify the use of each one based on the characteristics of the problem and the problem domain. Questions to ask yourself when writing this section:
 - _Are the algorithms you will use, including any default variables/parameters in the project clearly defined?_
 - _Are the techniques to be used thoroughly discussed and justified?_
@@ -192,7 +192,7 @@ For Tree-based models like XGBoost, Feature Scaling is not required, but I have 
 
 In order to save computational power and time, I have tested the baseline model with Stratified Samples of the training set. The sample size started at 10% and was incremented by 10% every test until 100%, meaning the entire dataset.
 
-Plotting results obtained, we can see that the best result (AUC = 0.8622) came from 70% of the dataset size and using only 50% of it also shown a very good result (AUC = 0.8596).
+Plotting results obtained, we can see that the best result (AUC = 0.8623) came from 70% of the dataset size and using only 50% of it also shown a very good result (AUC = 0.8599).
 
 <center>
 <img src="assets/AUC Score by Size.png">
@@ -229,186 +229,190 @@ The software requirement for the implementation is as followed:
 * xgboost >= 0.90
 * hyperopt >= 0.2 
 
-I first attempted to train an XGBoost model right of the box, without tuning. Then I planned to compare the performance to the same model trained with hyperparameter tuning. The model's performance is evaluated by its ROC-AUC score on the testing data. The only model's parameters were as followed:
-* Objective function: logistic binary
-* Scale positive weight: 99 (scale up the weight of the positive data points `is_attributed==0` to counter the imbalance of the data)
-* Parallel jobs: 3 (to make use of CPU cores)
-* Tree method: "exact"
-On a system with a 4-cored CPU and 16GB of RAM, the dataset itself occupied half of the system memory, therefore XGBoost encountered memory error training on the whole dataset. Moreover, constructing `time_to_next_click` feature was also impossible due to memory shortage. This data proved to be simply impossible to train as it is. At this point I decided to use on only a portion of the data; at 10 million data points, the model scored a point of 0.5445 on the test data, significantly higher than the baseline of 0.3893 by the random-guessing model, but is still a terrible score. There was much to be done to refine this result.
+I first attempted to train an XGBoost model right of the box, without tuning. Then, I planned to compare the performance to the same model trained with hyperparameter tuning.  In the first attempt, the only hyperparameter passed was `n_jobs = -1` to force using all CPU cores.
 
-### Refinement
+The AUC Score obtained was 0.8306 on the validation subset, which is not good compared with our baseline model, Logistic Regression.
+
+Let's tune the model to see if we can get a better result.
+
+### **Refinement**
 <!-- In this section, you will need to discuss the process of improvement you made upon the algorithms and techniques you used in your implementation. For example, adjusting parameters for certain models to acquire improved solutions would fall under the refinement category. Your initial and final solutions should be reported, as well as any significant intermediate results as necessary. Questions to ask yourself when writing this section:
 - _Has an initial solution been found and clearly reported?_
 - _Is the process of improvement clearly documented, such as what techniques were used?_
 - _Are intermediate and final solutions clearly reported as the process is improved?_ -->
 
-#### Hyperparameter tuning
+#### **Hyperparameter tuning**
 
-The refinement process started with hyperparameter tuning. Thanks to XGBoost's versatility that its classifier object `XGBClassifier` is actually compatible with scikit-learn framework, I was able to make use of scikit-learn's `GridSearchCV` object to perform tuning. The search space contains values for the following parameters:
+The refinement process started with hyperparameter tuning. To handle this task I have decided to use Hyperopt package.
 
-* `max_depth`:
-  * Maximum depth of a tree
-  * Used to prevent overfitting, as higher depth allows model to learn more specific relations
-  * Search values: [5..10]
-* `learning_rate`:
-  * Control how fast the model tries to converge
-  * Search values: [0.05, 0.10, ..., 0.25]
+Hyperopt uses Bayesian Optimization which combines randomness and posterior probability distribution in searching the optimal parameters. In contrast, GridSearch from SKLearn uses purely random methodology, which is not the smart way. <a href='https://towardsdatascience.com/an-example-of-hyperparameter-optimization-on-xgboost-lightgbm-and-catboost-using-hyperopt-12bc41a271e'>Reference</a>
+
+The optimized parameters were:
+
 * `gamma`:
   * Minimum loss reduce for each node split
-  * Search values: [0.01, 0.02, ..., 0.05]
+  * Search values: [5..10]
 * `min_child_weight`:
   * Minimum sum of weights of all observations required in a child node
   * Used to avoid overfitting as higher values prevent model to learn relations specific to the dataset
   * Search values: [1..5]
-* `max_delta_step`:
-  * Control the update step of each tree's weight estimation
-  * Important when classes are imbalanced
-  * Search values: [10, 12, 14, ..., 20]
+* `subsample`:
+  * Subsample ratio of the training instances
+  * Search values: [0.5..1.0]
 * `colsample_bytree`:
   * Control the amount of features to be sampled by each tree
-  * Search values: [0.5, 0.6, ..., 1.0]
-* `reg_lambda`:
-  * L2 regularization
-  * Search values: [1000, 2000, 3000]
+  * Search values: [0.2, 0.9]
+* `reg_alpha`:
+  * L1 regularization
+  * Search values: [0.1..1.0]
+* `scale_pos_weight`:
+  * Control the balance of positive and negative weights, useful for unbalanced classes.
+  * Search values: [8..10]
 
-On fitting the grid with the sample training data (100,000 rows of train.csv randomly sampled), the best estimator with optimized ROC-AUC score is:
+Running 500 evaluations the best parameters found were:
 
-```
-XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1.0,
-       colsample_bytree=0.7, gamma=0.03, learning_rate=0.15,
-       max_delta_step=20, max_depth=6, min_child_weight=4, missing=None,
-       n_estimators=100, n_jobs=4, nthread=None,
-       objective='binary:logistic', random_state=42, reg_alpha=0,
-       reg_lambda=1000, scale_pos_weight=99, seed=None, silent=True,
-       subsample=1.0, tree_method='hist')
-Best ROC-AUC: 0.9733
-```
+* `colsample_bytree`: 0.2
+* `gamma`: 9.0
+* `min_child_weight`: 4.0
+* `reg_alpha`: 0.35
+* `scale_pos_weight`: 8.920569929381536,
+* `subsample`: 0.55
 
-#### Incremental training
+For the final model it was added the following parameters:
 
-After doing some research, I found out how to train an XGBoost model incrementally. I divided the training data into non-overlapping chunks of pre-determined size; at each iteration, I loaded one chunk into the memory and train the model with that chunk. Once this is done, the memory is cleared and ready to load the next chunk of data. This process was repeated for all data chunks.
+* `learning rate`: 0.2
+  *  Step size shrinkage used in update to prevents overfitting.
+* `max_depth`: 2
+  * Maximum depth of a tree. Increasing this value will make the model more complex and more likely to overfit.
+* `objective`: "binary:logistic"
+  * Logistic Regression for binary classification, output probability
+* `tree_method`: 'gpu_hist'
+  * Fast histogram optimized approximate greedy algorithm. It uses some performance improvements such as bins caching.
+  * GPU acceleration.
+* `verbosity`: 0
+  * Verbosity of printing messages.
 
-Incremental training helped avoiding the need to have the whole training data loaded on the memory, allowing the model to have more computational resources and also made the training possible since the model can avoid memory error with smaller data. However, this also means the model is continuously trained with different data each time; without the whole data being available at all time, the tree construction is less ideal since it is impossible to choose upon optimal splits, as discussed [here](https://github.com/dmlc/xgboost/issues/3055#issuecomment-359505122).
-
-#### GPU mode
-
-Apart from incremental training, XGBoost also allows utilizing GPU resources for better computation time. Using a NVIDIA's GeForce GTX 1070 with 8GB VRAM, and the same sample dataset of 100,000 rows with same hyperparameters, I saw training time reduced by almost 75%.
-
-However, setting up GPU support for XGBoost on a Windows system turned out to be very time-consuming due to a bug in drivers that delayed the installation and another bug in XGBoost GPU mode itself that crashed the kernel during incremental training.
-
-## IV. Results
+## **IV. Results**
 <!-- _(approx. 2-3 pages)_ -->
 
-### Model Evaluation and Validation
+### **Model Evaluation and Validation**
 <!-- In this section, the final model and any supporting qualities should be evaluated in detail. It should be clear how the final model was derived and why this model was chosen. In addition, some type of analysis should be used to validate the robustness of this model and its solution, such as manipulating the input data or environment to see how the model’s solution is affected (this is called sensitivity analysis). Questions to ask yourself when writing this section:
 - _Is the final model reasonable and aligning with solution expectations? Are the final parameters of the model appropriate?_
 - _Has the final model been tested with various inputs to evaluate whether the model generalizes well to unseen data?_
 - _Is the model robust enough for the problem? Do small perturbations (changes) in training data or the input space greatly affect the results?_
 - _Can results found from the model be trusted?_ -->
 
-Even though I managed to bypass the system memory limit on XGBoost by training the model incrementally, it still remains that Pandas is unable to produce the engineered feature `time_to_next_click` on the whole dataset. Therefore, I decided to again train the model on just a subset of the data. After some trials and errors, I found that 60,000,000 was the limit to which Pandas managed to generate `time_to_next_click` without memory error.
+With the model properly tuned, it is ready to finally be trained.
 
-The final model design was built with the tuned hyperparameters as mentioned earlier, using GPU mode (`tree_method`: `gpu_hist`), trained on 60,000,000 data points with `avg_app_click_by_ip` and `time_to_next_click` features along with extracted time features. Score obtained on the testing set: 0.9700
+To assure the results and evaluate the robustness and generalization, one best practice is to use K-Fold Cross Validation (CV).
 
-To see the effect of having a smaller dataset but one extra feature, I have
-also trained another model with the same hyperparameters and on the whole training dataset, but without the `time_to_next_click` feature. Score obtained on the testing set: 0.9575
+Usually, we split the data set into training and testing sets (as we did) and use the training set to train the model and testing set to test the model. Then, we evaluate the model based on an error metric to determine the accuracy of the model. This method however, is not very reliable as the accuracy obtained for one test set can be very different to the accuracy obtained for a different test set. K-fold Cross Validation (CV) provides a solution to this problem by dividing the data into folds and ensuring that each fold is used as a testing set at some point. <a href='https://medium.com/datadriveninvestor/k-fold-cross-validation-6b8518070833'>Reference</a>
 
-In conclusion, having `time_to_next_click` improved the performance of the dataset (0.0125) over having just the `avg_app_click_by_ip` feature even when trained on just about 30% of the data. It is certain that when trained with the whole dataset, this feature would increase the model's accuracy even more.
+I have used `RepeatedStratifiedKFold` from SKLearn Library to apply Cross Validation. The parameters passed was:
+* `n_splits` = 4 
+  * Number of folds or buckets.
+  * 4 buckets of data: 3 for training, 1 for testing.
+* `n_repeats` = 2 
+  * Number of times cross-validator needs to be repeated.
 
-### Justification
+In the end, the model was trained 08 times and the results stored in a dataframe to evaluation.
+
+As mentioned before, I have used just 50% of the original train set.
+
+The final scores using validation subsets are these:
+
+* **AUC Score**:
+  * Min: 0.886400
+  * Mean: 0.889550
+  * Max: 0.891600
+* **Precision**:
+  * Min: 0.382974
+  * Mean: 0.387747
+  * Max: 0.396058
+* **Recall**:
+  * Min: 0.720524
+  * Mean: 0.734544
+  * Max: 0.741961
+
+
+### **Justification**
 <!-- In this section, your model’s final solution and its results should be compared to the benchmark you established earlier in the project using some type of statistical analysis. You should also justify whether these results and the solution are significant enough to have solved the problem posed in the project. Questions to ask yourself when writing this section:
 - _Are the final results found stronger than the benchmark result reported earlier?_
 - _Have you thoroughly analyzed and discussed the final solution?_
 - _Is the final solution significant enough to have solved the problem?_ -->
 
-The final model design with tuned hyperparameters trained on a third of the data with extra features scored 0.9700 on the testing data, dwarfing the score of the random guessing model at 0.3893. This means that the final model far surpasses the random guessing model in terms of learning the target concept, as a perfect predictor would give a score of 1.0.
+Analyzing the results above, we can see that tuned XGBoost got an average AUC Score near 0.89 using validation subsets, which is 3% over our baseline model (0.8599).
 
-In the boundaries of the competition, I can say these results are encouraging and show that the approach taken is the right direction, although there is so much to improve upon.
+Looking at Precision Score, we notice about 8% of improvement over the baseline model. XGBoost gave us 0.3877, which means that of all positive predictions, XGBoost was correct 38.77% on average, while Logistic Regression 30,13%.
 
-## V. Conclusion
-<!-- _(approx. 1-2 pages)_ -->
+Recall, on another hand, shown a minor loss. Logistic Regression delivered a Recall Score of 0.7691, meaning that the baseline model detected about 76.91% of all True Positives. XGBoost, however, detected 73.45%.
 
-### Free-Form Visualization
+Overall, in my opinion, XGBoost was better. We lose a little in Recall, but we gain in Precision, thus, XGBoost made fewer mistakes.
 
-To get a glimpse, I constructed more `time_to_next_click` features, this time using different aggregations of given features [`ip`, `os`, `device`, `channel`, `app`] to identify individual "clicking session" or "clicking spree". As previously mentioned, the intuition is that a fraudster would have very short amount of time in between advertisement clicks compared to a normal mobile user. I also paired `ip` with `app` and `channel` to construct time to next click features, because as mentioned earlier some fraudsters may make use of "click farm" with various different devices to generate fake clicks, and in those cases the IP address is the only way to identify them.
-
-Again due to hardware limitation, I was only able to construct the new `time_to_next_click` features with 10,000,000 rows of the training data. I then fitted the data with an XGBoost classifier and used the `plot_importance` feature of XGBoost to see how much each feature has an impact on predicting the outcome of a click. The graph of feature importance is given below:
+Let's visualize the Receiver Operating Characteristic Curve (ROC Curve):
 
 <center>
-![feature importance](assets/feature_importance.png)
+<img src="assets/ROC.png">
 </center>
 
-As can be seen, among the 7 newly constructed `time_to_next_click` features, groupings of [`ip`, `app`] and [`ip`, `os`, `device`, `app`] were the most impactful. This aligned with my above assertion that for some cases, [`ip`, `app`] is the best way to identify a fraudster's "clicking session"; [`ip`, `os`, `device`, `app`] on the other hand shows that a fake click can still be identified with more specific user information aside from just their IP address; perhaps these are cases where fraudsters use mostly similar devices because they were cheap?
+Now it is time to make the submission to Kaggle website and see if our model really learned and will keep the AUC around 0.89.
 
-### Reflection
+Here is the result from Kaggle:
+
+<center>
+<img src="assets/Final_Score.png">
+</center>
+
+As expected, we got **0.88997** very close to 0.89 from validation score. **Cheers!**
+
+## **V. Conclusion**
+<!-- _(approx. 1-2 pages)_ -->
+
+### **Reflection**
 <!-- In this section, you will summarize the entire end-to-end problem solution and discuss one or two particular aspects of the project you found interesting or difficult. You are expected to reflect on the project as a whole to show that you have a firm understanding of the entire process employed in your work. Questions to ask yourself when writing this section:
 - _Have you thoroughly summarized the entire process you used for this project?_
 - _Were there any interesting aspects of the project?_
 - _Were there any difficult aspects of the project?_
 - _Does the final model and solution fit your expectations for the problem, and should it be used in a general setting to solve these types of problems?_ -->
 
-#### End-to-end problem solution
+#### **End-to-end problem solution**
 
-This project turned out to be one that emphasizes on handling big data and utilizing computational resources; the given data was clean and thoroughly processed, the target concept is clearly defined, the features gave lots of room for engineering and research. All that was left was working around the sheer gigantic size of the data and optimizing all computing power at hand to fit it in, so much so that the data itself became the main problem instead of the target concept throughout the project.
+This project turned out to be one that emphasizes on building and tuning model; the given data was very clean and thoroughly processed, the target concept is clearly defined, the features didn't give room for engineering. All that was left was working around the model, fine-tuning and searching for the best result.
 
-Therefore, my problem solution not just includes data processing and training but also hardware optimization:
+Here is the pipeline solution:
 
-* Establish basic statistics and understanding of the dataset such as imbalance, data type, etc.
-  * Data cleaning was not needed as the given data was thoroughly processed by TalkingData.
-  * Extracted clicking time information (day, hour, minute) into a format usable by trainer.
-* Devise new features based on the given features:
-  * Average click on the same advertisement by the same IP address
-  * How much time does it take until the same IP address clicks again?
-    * This feature proved to be impossible to produce on the whole training data due to hardware limitations
+* Establish basic statistics and understanding of the dataset such as imbalance, missing values, feature distributions, etc.
+  * Data cleaning was not needed as the given data was thoroughly processed by Santander.
+* Preprocessing Data:
+  * Preprocess data using scaling and sampling.
+  * Attempt to identify highly correlated features to drop, but there is none.
 * Train and test model's performance:
-  * Model was unable to fit the whole dataset, again due to hardware limitations
-  * As `time_to_next_click` was also impossible to produce on the whole data, used only 10 million data points instead
-  * Score: 0.5445
+  * Training Logistic Regression and XGBoost without tuning for benchmark comparison.
+   * LR AUC Score: 0.8599
+   * XGBoost AUC Score: 0.8306
 * Improve:
-  * Fine-tune model's parameters with `GridSearchCV`
-  * Implemented incremental training so that model can make use of the whole dataset
-  * Setup model to train on GPU, computation time improved by 75%
+  * Fine-tune model's parameters with `Hyperopt`
 * Train and test again:
-  * `time_to_next_click` was still impossible to produce, so I decided to use 60 million rows of data this time; it is small enough so that Pandas can generate the feature. Score: 0.9700
-  * To compare, I trained another model with the same hyperparameters, but with all the data and without the `time_to_next_click` feature. Score: 0.9575
+  * Kaggle submission AUC Score: 0.88997   
 
-### Challenges
+### **Challenges**
 
-I encountered many difficulties at different steps of the projects.
+The major challenge encountered was working with all the features. I tried many different approaches to minimize the number of features, but in the end, the best result came from all of them together. Working in the dark, without knowing about the features was a little frustrating. 
 
-Firstly, as mentioned earlier, I could not produce one of the new features I needed for the whole dataset due to not having enough system memory; in the end I decided to settle with using just a portion of the given data instead.
 
-Secondly, again due to low memory problem, the classification model I used was not able to take in the whole dataset to train. This costed me a couple of days to look into until I found the way to implement incremental training for XGBoost classifier.
-
-Thirdly, after managing to get the training in place, I realized still it took a relatively long time for the model to train even with just a fraction of data. While this is acceptable for the training process, it made the hyperparameter tuning step impossible, as I used `Grid Search` to perform brute force method to find the optimal parameters with thousands of combinations in the search space; the long training time for each instance meant it would take days to run! Luckily, I found that XGBoost supported training using GPU which greatly decreased training time, so I decided to rebuild XGBoost with GPU mode. Unfortunately, the rebuild process turned out to be the most frustrating part of the project, as I was met with various software compatibility issues on Windows environment; Visual Studio refused to work with XGBoost build when specified with certain versions of CUDA (computing driver for GPU) included. It's only after 3 days with dozens of trials and errors with different software versions that I finally got XGBoost with GPU mode up and running; training time immediately reduced by 4 times!
-
-In conclusion, while there were many obstacles along the way, I think it was largely due to my inexperience. In the end, I felt appreciative towards those problems that I met, they are all precious practical experiences that only come by working on a real-world project like this one. They also made me realize that I still have so much to learn.
-
-### Improvement
+### **Improvement**
 <!-- In this section, you will need to provide discussion as to how one aspect of the implementation you designed could be improved. As an example, consider ways your implementation can be made more general, and what would need to be modified. You do not need to make this improvement, but the potential solutions resulting from these changes are considered and compared/contrasted to your current solution. Questions to ask yourself when writing this section:
 - _Are there further improvements that could be made on the algorithms or techniques you used in this project?_
 - _Were there algorithms or techniques you researched that you did not know how to implement, but would consider using if you knew how?_
 - _If you used your final solution as the new benchmark, do you think an even better solution exists?_ -->
 
-There is so much that can be improved upon for this project, for example the same model design training on the whole dataset with all generated features present would no doubt yield a much higher performance.
+There is so much that can be improved upon for this project.
 
-#### Overcome memory limits for feature engineering
+I also have trained the XGBoost model with 100% of the data instead 50% and the result was 0.89603. Many tests were made and I was not able to reach 0.89993 like many competitors with this algorithm.
 
-I was unable to generate `time_to_next_click` feature on the whole dataset due to hardware limitations. After doing some research, I found that there were ways to workaround this such as using distributed system and paging memory.
+I would try to apply another algorithm like LightGBM and evaluate the performance.
 
-As I understand, distributed systems such as AWS clusters help overcome the memory constraint by distributing the data into its many node, each holds a chunk of the data that can work as a whole. These systems utilizes parallelization for speed and computing power, and definitely would be a big help in problems that deal with big data like this one.
-
-Another potential workaround that I found was using in-storage memory. Apparently, it was possible to construct certain file formats that resemble how data is stored on RAM, but instead these files can be stored on the system's hard drive which typically has more generous size than RAM. This method would the training data to be accessible by the system, without the need to have a big enough memory. This method may also obsolete the incremental step of training process, since the whole data is readily available at all time for the model to access.
-
-#### More time features worth exploring
-
-My intuition is to follow the clicking patterns of individual users, and the time between the clicks has proven to be an important feature. To exploit this further, we can also generate more time-between-click features such as how much time does is it between this click and the next 2 clicks, or how much time between this click and the previous click. The reason is that for normal users, there may be cases where the user makes more than 1 click in a short amount of time due to accident or because the user realizes something after finishes reading the advertisement, and goes back to it. These cases may be falsely identified as fake clicks, so to be able to look 2 or more clicks ahead would be helpful since it would be more rare for normal users to generate repeated clicks in any case.
-
-#### More app-based features
-
-Aside from time features, app-based and channel-based features may hold important information, since intuitively a fraudster often target a single app or advertisement to generate fake clicks, and often operates exclusively in certain app distributing channels since some channels do not have strict regulation against mobile frauds.
-
-Similar to the time features, `app` and `channel` can be associated with individual users or "clicking sessions" by aggregating them with different groups of given identity features: [`ip`, `device`, `os`]. Upon successfully generating these new features, I would gauge their importance similar to what I did in the previous section and include the 2 most important ones for the final model training.
+If we look at the leaderboard from Kaggle, the best result is 0.92573, which, in my opinion, is not a giant difference from our final score, but 0.89603 still very far from the top at position 5167/8802.
 
 -----------
 
